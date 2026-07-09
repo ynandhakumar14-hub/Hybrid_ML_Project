@@ -391,20 +391,39 @@ if "df" in st.session_state:
     # ------------------------------
     st.subheader("SelectKBest")
 
-    if len(features) > 0 and X is not None:
-        k_best = st.slider("Number of Features", 1, len(features), min(2, len(features)))
+if X is None:
 
-        if st.button("Run SelectKBest"):
-            try:
-                selector = SelectKBest(score_func=f_classif, k=k_best)
-                selector.fit(X, y)
-                selected = X.columns[selector.get_support()]
-                st.success("Top Features")
-                st.write(selected.tolist())
-            except Exception as e:
-                st.error(f"SelectKBest failed: {e}")
-    else:
-        st.info("Select feature columns above first.")
+    st.info("Please upload a dataset first.")
+
+elif len(features) < 2:
+
+    st.warning("Select at least 2 feature columns to use SelectKBest.")
+
+else:
+
+    k_best = st.slider(
+        "Number of Features",
+        min_value=1,
+        max_value=len(features),
+        value=min(2, len(features))
+    )
+
+    if st.button("Run SelectKBest"):
+
+        selector = SelectKBest(
+            score_func=f_classif,
+            k=k_best
+        )
+
+        selector.fit(X, y)
+
+        selected_features = X.columns[
+            selector.get_support()
+        ]
+
+        st.success("Selected Features")
+
+        st.write(selected_features.tolist())
 
     # ------------------------------
     # Feature Importance
